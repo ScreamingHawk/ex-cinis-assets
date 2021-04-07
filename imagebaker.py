@@ -1,29 +1,72 @@
 import sys
 import os
+from glob import glob
 
-os.chdir(sys.path[0])
-
-#os.listdir(path)
-#set the working directory to script location
 try:
     from PIL import Image
 except ImportError:
     import Image
-background = Image.open(r"helm\headbase\headbase1.png")
-overlay1 = Image.open(r"helm\mouthpiece\mouthpiece1.png")
-overlay2 = Image.open(r"helm\earpiece\earpiece1.png")
-overlay3 = Image.open(r"helm\visor\visor1.png")
 
-background.paste(overlay1, (0, 0), overlay1)
-background.paste(overlay2, (0, 0), overlay2)
-background.paste(overlay3, (0, 0), overlay3)
-#background.show()
-#uncomment above if you want the combined image displayed in an image viewer immediately
+gearTypes = ["helm"] # List of base types
 
-background = background.convert("RGBA")
-#I really don't know what this does but it might be important
+# Strip the path and extension from the filename
+def stripFilename(fname):
+    print("Splitting: " + fname)
+    return str(fname).split("\\")[-1].split(".")[0]
 
-background.save("combined.png","PNG")
-#save the image in the script location
+# Generate the image from the supplied paths
+def generateImage(gearType, background, overlay1, overlay2 = None, overlay3 = None):
+    filename = "output/" + gearType + "/" + stripFilename(background) + stripFilename(overlay1)
+    background = Image.open(background)
+    overlayImage = Image.open(overlay1)
+    background.paste(overlayImage, (0, 0), overlayImage)
+
+    if overlay2:
+        filename += stripFilename(overlay2)
+        overlayImage = Image.open(overlay2)
+        background.paste(overlayImage, (0, 0), overlayImage)
+    if overlay3:
+        filename += stripFilename(overlay3)
+        overlayImage = Image.open(overlay3)
+        background.paste(overlayImage, (0, 0), overlayImage)
+
+    # Uncomment if you want the combined image displayed in an image viewer immediately
+    #background.show()
+
+    background = background.convert("RGBA")
+
+    print("Generated image: " + filename)
+    background.save(filename + ".png", "PNG")
+
+# Run for each gear type
+for gearType in gearTypes:
+    print("Generating all " + gearType)
+
+    # Create output folder
+    if not os.path.exists("output/" + gearType):
+        os.mkdir("output/" + gearType)
+
+    # List all subfolders
+    layerFolders = [f for f in glob(gearType + "/*/")]
+
+    # Find all layers in each subfolder
+    layers = []
+    for layerFolder in layerFolders:
+        currentLayers = [f for f in glob(layerFolder + "/*.png")]
+        if currentLayers:
+            # Add layers if the folder isn't empty
+            layers.append(currentLayers)
+
+    # Ensure we have 4 layers (even if they are empty)
+    while len(layers) < 4:
+        layers.append([None])
+
+    # Generate every possible combination of layers for the gear
+    for a in layers[0]:
+        for b in layers[1]:
+            for c in layers[2]:
+                for d in layers[3]:
+                    # Generate the image passing in each layer
+                    generateImage(gearType, a, b, c, d)
 
 print ('Possibly successful layering!')
