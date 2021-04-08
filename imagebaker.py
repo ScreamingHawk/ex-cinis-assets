@@ -15,7 +15,7 @@ def stripFilename(fname):
     return str(fname).split("\\")[-1].split(".")[0]
 
 # Generate the image from the supplied paths
-def generateImage(gearType, background, overlay1, overlay2 = None, overlay3 = None):
+def generateImage(gearType, background, overlay1, overlay2, overlay3):
     filename = "output/" + gearType + "/" + stripFilename(background) + stripFilename(overlay1)
     background = Image.open(background)
     overlayImage = Image.open(overlay1)
@@ -44,7 +44,7 @@ for gearType in gearTypes:
 
     # Create output folder
     if not os.path.exists("output/" + gearType):
-        os.mkdir("output/" + gearType)
+        os.mkdirs(os.path.join('output', gearType))
 
     # List all subfolders
     layerFolders = [f for f in glob(gearType + "/*/")]
