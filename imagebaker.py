@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 from glob import glob
 
 try:
@@ -38,8 +39,10 @@ def generateImage(gearType, background, overlay1, overlay2, overlay3):
     print("Generated image: " + filename)
     background.save(filename + ".png", "PNG")
 
+startTotal = time.time()
 # Run for each gear type
 for gearType in gearTypes:
+    start = time.time()
     print("Generating all " + gearType)
 
     # Create output folder
@@ -69,4 +72,8 @@ for gearType in gearTypes:
                     # Generate the image passing in each layer
                     generateImage(gearType, a, b, c, d)
 
-print ('Possibly successful layering!')
+    # Print how long it took to do a whole gear type
+    print("Generating {} took {:.2f} seconds".format(gearType, time.time()-start))
+
+print("All together it took {:.2f} seconds".format(time.time()-startTotal))
+print('Possibly successful layering!')
