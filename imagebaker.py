@@ -15,23 +15,17 @@ def stripFilename(fname):
     return str(fname).split("\\")[-1].split(".")[0]
 
 # Generate the image from the supplied paths
-def generateImage(gearType, background, overlay1, overlay2, overlay3):
-    filename = "output/" + gearType + "/" + stripFilename(background) + stripFilename(overlay1)
+def generateImage(gearType, background, layers):
+    filename = "output/" + gearType + "/" + stripFilename(background)
     background = Image.open(background)
 
     background = background.convert("RGBA")
 
-    overlayImage = Image.open(overlay1)
-    background.paste(overlayImage, (0, 0), overlayImage)
-
-    if overlay2:
-        filename += stripFilename(overlay2)
-        overlayImage = Image.open(overlay2)
-        background.paste(overlayImage, (0, 0), overlayImage)
-    if overlay3:
-        filename += stripFilename(overlay3)
-        overlayImage = Image.open(overlay3)
-        background.paste(overlayImage, (0, 0), overlayImage)
+    for layer in layers:
+        if layer is not None:
+            filename += stripFilename(layer)
+            overlayImage = Image.open(layer)
+            background.paste(overlayImage, (0, 0), overlayImage)
 
     # Uncomment if you want the combined image displayed in an image viewer immediately
     #background.show()
@@ -40,6 +34,10 @@ def generateImage(gearType, background, overlay1, overlay2, overlay3):
     background.save(filename + ".png", "PNG")
 
 startTotal = time.time()
+
+# Read common backgrounds
+backgrounds = [f for f in glob("backgrounds/*.png")]
+
 # Run for each gear type
 for gearType in gearTypes:
     start = time.time()
@@ -47,7 +45,7 @@ for gearType in gearTypes:
 
     # Create output folder
     if not os.path.exists("output/" + gearType):
-        os.mkdirs(os.path.join('output', gearType))
+        os.makedirs(os.path.join('output', gearType))
 
     # List all subfolders
     layerFolders = [f for f in glob(gearType + "/*/")]
@@ -65,12 +63,13 @@ for gearType in gearTypes:
         layers.append([None])
 
     # Generate every possible combination of layers for the gear
-    for a in layers[0]:
-        for b in layers[1]:
-            for c in layers[2]:
-                for d in layers[3]:
-                    # Generate the image passing in each layer
-                    generateImage(gearType, a, b, c, d)
+    for background in backgrounds:
+        for a in layers[0]:
+            for b in layers[1]:
+                for c in layers[2]:
+                    for d in layers[3]:
+                        # Generate the image passing in each layer
+                        generateImage(gearType, background, [a, b, c, d])
 
     # Print how long it took to do a whole gear type
     print("Generating {} took {:.2f} seconds".format(gearType, time.time()-start))
