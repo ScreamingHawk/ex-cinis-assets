@@ -11,13 +11,15 @@ gearTypes = ["helm"] # List of base types
 
 # Strip the path and extension from the filename
 def stripFilename(fname):
-    print("Splitting: " + fname)
     return str(fname).split("\\")[-1].split(".")[0]
 
 # Generate the image from the supplied paths
 def generateImage(gearType, background, overlay1, overlay2, overlay3):
     filename = "output/" + gearType + "/" + stripFilename(background) + stripFilename(overlay1)
     background = Image.open(background)
+
+    background = background.convert("RGBA")
+
     overlayImage = Image.open(overlay1)
     background.paste(overlayImage, (0, 0), overlayImage)
 
@@ -32,8 +34,6 @@ def generateImage(gearType, background, overlay1, overlay2, overlay3):
 
     # Uncomment if you want the combined image displayed in an image viewer immediately
     #background.show()
-
-    background = background.convert("RGBA")
 
     print("Generated image: " + filename)
     background.save(filename + ".png", "PNG")
