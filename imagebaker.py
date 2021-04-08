@@ -2,6 +2,8 @@ import sys
 import os
 import time
 from glob import glob
+from multiprocessing import Pool
+import itertools
 
 try:
     from PIL import Image
@@ -30,18 +32,12 @@ def generateImage(gearType, background, layers):
     # Uncomment if you want the combined image displayed in an image viewer immediately
     #background.show()
 
-    print("Generated image: " + filename)
+    #print("Generated image: " + filename)
     background.save(filename + ".png", "PNG")
 
-startTotal = time.time()
-
-# Read common backgrounds
-backgrounds = [f for f in glob("backgrounds/*.png")]
-
-# Run for each gear type
-for gearType in gearTypes:
+def generateGearTypeImagesForRarity(gearType, background):
     start = time.time()
-    print("Generating all " + gearType)
+    print("Generating all " + gearType + " for " + background)
 
     # Create output folder
     if not os.path.exists("output/" + gearType):
@@ -63,16 +59,25 @@ for gearType in gearTypes:
         layers.append([None])
 
     # Generate every possible combination of layers for the gear
-    for background in backgrounds:
-        for a in layers[0]:
-            for b in layers[1]:
-                for c in layers[2]:
-                    for d in layers[3]:
-                        # Generate the image passing in each layer
-                        generateImage(gearType, background, [a, b, c, d])
+    for a in layers[0]:
+        for b in layers[1]:
+            for c in layers[2]:
+                for d in layers[3]:
+                    # Generate the image passing in each layer
+                    generateImage(gearType, background, [a, b, c, d])
 
     # Print how long it took to do a whole gear type
     print("Generating {} took {:.2f} seconds".format(gearType, time.time()-start))
 
-print("All together it took {:.2f} seconds".format(time.time()-startTotal))
-print('Possibly successful layering!')
+if __name__ == "__main__":
+    startTotal = time.time()
+
+    # Read common backgrounds
+    backgrounds = [f for f in glob("backgrounds/*.png")]
+
+    # Use 4 cores
+    with Pool(processes=4) as pool:
+        pool.starmap(generateGearTypeImagesForRarity, itertools.product(gearTypes, backgrounds))
+
+    print("All together it took {:.2f} seconds".format(time.time()-startTotal))
+    print('Possibly successful layering!')
