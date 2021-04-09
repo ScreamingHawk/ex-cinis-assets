@@ -14,6 +14,14 @@ This script will combine every possible permutation of components to create ever
 python imagebaker.py
 ```
 
+### jsongenerator.py
+
+This script will generate the JSON every possible permutation of components to create every possible gear.
+
+```sh
+python jsongenerator.py
+```
+
 ### clearoutput.py
 
 This script will remove all generated images.

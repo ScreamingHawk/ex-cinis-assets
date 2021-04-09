@@ -5,35 +5,30 @@ from glob import glob
 from multiprocessing import Pool
 import itertools
 
+import commonfunctions
+
 try:
     from PIL import Image
 except ImportError:
     import Image
 
-gearTypes = ["helm"] # List of base types
-
-# Strip the path and extension from the filename
-def stripFilename(fname):
-    return str(fname).split("\\")[-1].split(".")[0]
-
 # Generate the image from the supplied paths
 def generateImage(gearType, background, layers):
-    filename = "output/" + gearType + "/" + stripFilename(background)
-    background = Image.open(background)
+    img = Image.open(background)
 
-    background = background.convert("RGBA")
+    img = img.convert("RGBA")
 
     for layer in layers:
         if layer is not None:
-            filename += stripFilename(layer)
             overlayImage = Image.open(layer)
-            background.paste(overlayImage, (0, 0), overlayImage)
+            img.paste(overlayImage, (0, 0), overlayImage)
 
     # Uncomment if you want the combined image displayed in an image viewer immediately
     #background.show()
 
+    filename = commonfunctions.generateImageFilename(gearType, background, layers)
     #print("Generated image: " + filename)
-    background.save(filename + ".png", "PNG")
+    img.save(filename, "PNG")
 
 def generateGearTypeImagesForRarity(gearType, background):
     start = time.time()
@@ -43,16 +38,7 @@ def generateGearTypeImagesForRarity(gearType, background):
     if not os.path.exists("output/" + gearType):
         os.makedirs(os.path.join('output', gearType))
 
-    # List all subfolders
-    layerFolders = [f for f in glob(gearType + "/*/")]
-
-    # Find all layers in each subfolder
-    layers = []
-    for layerFolder in layerFolders:
-        currentLayers = [f for f in glob(layerFolder + "/*.png")]
-        if currentLayers:
-            # Add layers if the folder isn't empty
-            layers.append(currentLayers)
+    layers = commonfunctions.listAllLayers(gearType)
 
     # Ensure we have 4 layers (even if they are empty)
     while len(layers) < 4:
@@ -72,12 +58,11 @@ def generateGearTypeImagesForRarity(gearType, background):
 if __name__ == "__main__":
     startTotal = time.time()
 
-    # Read common backgrounds
-    backgrounds = [f for f in glob("backgrounds/*.png")]
+    backgrounds = commonfunctions.listAllBackgrounds()
 
     # Use 4 cores
     with Pool(processes=4) as pool:
-        pool.starmap(generateGearTypeImagesForRarity, itertools.product(gearTypes, backgrounds))
+        pool.starmap(generateGearTypeImagesForRarity, itertools.product(commonfunctions.listGearTypes(), backgrounds))
 
     print("All together it took {:.2f} seconds".format(time.time()-startTotal))
     print('Possibly successful layering!')
