@@ -4,7 +4,7 @@ from glob import glob
 
 def listGearTypes():
     """ Return a list of base gear types. """
-    return ["helm"]
+    return ["helm" ,"chest"]
 
 def stripFilename(fname):
     """ Strip the path and extension from the filename. """
