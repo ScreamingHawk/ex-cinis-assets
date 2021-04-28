@@ -36,7 +36,11 @@ def generateGearTypeImagesForRarity(gearType, background):
 
     # Create output folder
     if not os.path.exists("output/" + gearType):
-        os.makedirs(os.path.join('output', gearType))
+        try:
+            os.makedirs(os.path.join('output', gearType))
+        except FileExistsError:
+            # Race condition due to threading
+            pass
 
     layers = commonfunctions.listAllLayers(gearType)
 
