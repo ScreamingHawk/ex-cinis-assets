@@ -21,7 +21,12 @@ def generateImage(gearType, background, layers):
     for layer in layers:
         if layer is not None:
             overlayImage = Image.open(layer)
-            img.paste(overlayImage, (0, 0), overlayImage)
+            try:
+                img.paste(overlayImage, (0, 0), overlayImage)
+            except ValueError as e:
+                print("Error generating image for files: " + background + ", " + ", ".join(layers))
+                print("Error image specifically: " + layer)
+                raise e
 
     # Uncomment if you want the combined image displayed in an image viewer immediately
     #background.show()
