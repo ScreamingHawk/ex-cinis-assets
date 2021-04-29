@@ -20,7 +20,7 @@ def generateImage(gearType, background, layers):
 
     for layer in layers:
         if layer is not None:
-            overlayImage = Image.open(layer)
+            overlayImage = Image.open(layer).convert("RGBA")
             try:
                 img.paste(overlayImage, (0, 0), overlayImage)
             except ValueError as e:
