@@ -1,6 +1,7 @@
 # A file for common shared functions
 
 from glob import glob
+from time import strptime
 
 def listGearTypes():
     """ Return a list of base gear types. """
@@ -13,6 +14,10 @@ def stripFilename(fname):
 def listAllBackgrounds():
     """ Read common backgrounds. """
     return [f for f in glob("backgrounds/*.png")]
+
+def listAllPalettes():
+    """ List all available palettes """
+    return [f for f in glob("palette/*.png")]
 
 def listAllLayers(gearType):
     """ List all layers for given gear type. """
@@ -29,9 +34,9 @@ def listAllLayers(gearType):
 
     return layers
 
-def generateImageFilename(gearType, background, layers):
+def generateImageFilename(gearType, background, layers, palette):
     """ Generate image filename from the supplied paths. """
-    filename = "output/" + gearType + "/" + stripFilename(background)
+    filename = f"output/{gearType}/{stripFilename(palette)}/{stripFilename(background)}/"
 
     for layer in layers:
         if layer is not None:
